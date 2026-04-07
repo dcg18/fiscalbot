@@ -31,21 +31,34 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// MIDDLEWARE
-app.use(cors());
+// MIDDLEWARE (CORS ARREGLADO)
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST"],
+  allowedHeaders: ["Content-Type"]
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// 🟢 HEALTH CHECK (IMPORTANTE PARA RENDER)
+// HEALTH CHECK
 app.get('/api/health', (req, res) => {
   res.json({ ok: true });
 });
 
 // PROMPT
 function getSystemPrompt() {
+  const today = new Date().toLocaleDateString('es-ES', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  });
+
   return `
 Eres un asesor fiscal y contable en España.
+
+Fecha actual: ${today}
 
 Responde:
 - Claro, profesional y breve
@@ -59,6 +72,11 @@ Datos útiles:
 
 Si es complejo:
 👉 recomienda cita: ${business.bookingUrl}
+
+Aviso:
+Información general, no sustituye asesoramiento profesional.
+`;
+}
 
 Aviso:
 Información general, no sustituye asesoramiento profesional.
@@ -88,17 +106,23 @@ function quickResponses(msg) {
   return null;
 }
 
-// OPENAI
+// OPENAI ROBUSTO
 async function askOpenAI(message) {
-  const response = await openai.responses.create({
-    model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
-    input: [
-      { role: 'system', content: getSystemPrompt() },
-      { role: 'user', content: message }
-    ],
-  });
+  try {
+    const response = await openai.responses.create({
+      model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+      input: [
+        { role: 'system', content: getSystemPrompt() },
+        { role: 'user', content: message }
+      ],
+    });
 
-  return response.output_text || 'No he podido responder.';
+    return response.output_text || 'No he podido responder.';
+
+  } catch (error) {
+    console.error("ERROR OPENAI:", error.message);
+    return "⏳ El sistema está despertando. Inténtalo en unos segundos.";
+  }
 }
 
 // CHAT WEB
@@ -121,7 +145,7 @@ app.post('/api/chat', async (req, res) => {
   } catch (error) {
     console.error("ERROR CHAT:", error);
     res.json({
-      reply: "Error del servidor. Puedes pedir cita aquí: " + business.bookingUrl
+      reply: "⏳ El sistema está despertando. Prueba otra vez o pide cita aquí: " + business.bookingUrl
     });
   }
 });
