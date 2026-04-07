@@ -9,8 +9,9 @@ const OpenAI = require('openai');
 const app = express();
 const port = process.env.PORT || 3000;
 
+// INFO NEGOCIO
 const business = {
-  name: process.env.BUSINESS_NAME || 'Asesoría Ejemplo SL',
+  name: process.env.BUSINESS_NAME || 'Asesoría Casanova',
   city: process.env.BUSINESS_CITY || 'Madrid',
   phone: process.env.BUSINESS_PHONE || '+34 600 000 000',
   email: process.env.BUSINESS_EMAIL || 'info@tuasesoria.com',
@@ -18,80 +19,97 @@ const business = {
   bookingUrl: process.env.BOOKING_URL || 'https://tuasesoria.com/citas',
 };
 
+// BASE FAQ
 const kbPath = path.join(__dirname, 'kb', 'spain_tax_faq.json');
-const kb = JSON.parse(fs.readFileSync(kbPath, 'utf8'));
+let kb = [];
+if (fs.existsSync(kbPath)) {
+  kb = JSON.parse(fs.readFileSync(kbPath, 'utf8'));
+}
 
+// OPENAI
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+// MIDDLEWARE
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-function getSystemPrompt(channel = 'web') {
+// 🟢 HEALTH CHECK (IMPORTANTE PARA RENDER)
+app.get('/api/health', (req, res) => {
+  res.json({ ok: true });
+});
+
+// PROMPT
+function getSystemPrompt() {
   return `
 Eres un asesor fiscal y contable en España.
 
 Responde:
 - Claro, profesional y breve
-- Con normativa española real
-- Sin inventar datos
+- Basado en normativa española
+- No inventes datos
 
-IMPORTANTE:
-- IVA general: 21%, reducido: 10%, superreducido: 4%
+Datos útiles:
+- IVA: 21%, 10%, 4%
 - Modelo 303: IVA trimestral
-- Modelo 130: pagos IRPF autónomos
+- Modelo 130: IRPF autónomos
 
-Si la consulta es compleja:
+Si es complejo:
 👉 recomienda cita: ${business.bookingUrl}
 
 Aviso:
-Esta información es general y no sustituye asesoramiento profesional.
+Información general, no sustituye asesoramiento profesional.
 `;
 }
 
-// ⚡ RESPUESTAS RÁPIDAS (MUY IMPORTANTE)
+// RESPUESTAS RÁPIDAS
 function quickResponses(msg) {
   msg = msg.toLowerCase();
 
   if (msg.includes('modelo 303')) {
-    return 'El modelo 303 es la declaración trimestral del IVA. Se presenta en abril, julio, octubre y enero.';
+    return 'El modelo 303 es la declaración trimestral del IVA.';
   }
 
   if (msg.includes('iva')) {
-    return 'En España el IVA puede ser 21%, 10% o 4% según el producto o servicio.';
+    return 'En España el IVA puede ser 21%, 10% o 4%.';
   }
 
   if (msg.includes('factura')) {
-    return 'Una factura debe incluir: datos fiscales, concepto, base imponible, IVA y total.';
+    return 'Una factura debe incluir: datos fiscales, base imponible, IVA y total.';
   }
 
   if (msg.includes('autonomo') || msg.includes('autónomo')) {
-    return 'Los autónomos cotizan según ingresos reales y deben presentar IVA e IRPF trimestralmente.';
+    return 'Los autónomos deben declarar IVA e IRPF trimestralmente.';
   }
 
   return null;
 }
 
-async function askOpenAI(userMessage) {
+// OPENAI
+async function askOpenAI(message) {
   const response = await openai.responses.create({
     model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
     input: [
       { role: 'system', content: getSystemPrompt() },
-      { role: 'user', content: userMessage }
+      { role: 'user', content: message }
     ],
   });
 
-  return response.output_text || 'No he podido responder correctamente.';
+  return response.output_text || 'No he podido responder.';
 }
 
+// CHAT WEB
 app.post('/api/chat', async (req, res) => {
   try {
     const { message } = req.body;
 
-    // ⚡ RESPUESTA RÁPIDA
+    if (!message) {
+      return res.json({ reply: "Escribe una consulta." });
+    }
+
     const quick = quickResponses(message);
     if (quick) {
       return res.json({ reply: quick });
@@ -101,30 +119,34 @@ app.post('/api/chat', async (req, res) => {
     res.json({ reply });
 
   } catch (error) {
-    console.error(error);
+    console.error("ERROR CHAT:", error);
     res.json({
-      reply: "Ha habido un problema al responder. Puedes pedir cita aquí: " + business.bookingUrl
+      reply: "Error del servidor. Puedes pedir cita aquí: " + business.bookingUrl
     });
   }
 });
 
-// 📱 WHATSAPP
+// WHATSAPP
 app.post('/webhooks/whatsapp', async (req, res) => {
-  const incoming = req.body.Body;
+  const incoming = req.body.Body || '';
   const twiml = new twilio.twiml.MessagingResponse();
 
-  const quick = quickResponses(incoming);
-  if (quick) {
-    twiml.message(quick);
-    return res.type('text/xml').send(twiml.toString());
+  try {
+    const quick = quickResponses(incoming);
+    if (quick) {
+      twiml.message(quick);
+    } else {
+      const reply = await askOpenAI(incoming);
+      twiml.message(reply);
+    }
+  } catch (error) {
+    twiml.message("Error. Contacta con nosotros: " + business.bookingUrl);
   }
-
-  const reply = await askOpenAI(incoming);
-  twiml.message(reply);
 
   res.type('text/xml').send(twiml.toString());
 });
 
+// START
 app.listen(port, () => {
   console.log(`Servidor funcionando en http://localhost:${port}`);
 });
