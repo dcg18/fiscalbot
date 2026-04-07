@@ -1,0 +1,62 @@
+[
+  {
+    "id": "iva_tipos",
+    "category": "IVA",
+    "question": "¿Qué tipos de IVA existen en España?",
+    "answer": "Con carácter general existen tipos del 21%, 10% y 4%. También pueden existir supuestos especiales o temporales y operaciones exentas, por lo que el bot debe advertir que confirme el caso concreto antes de cerrar una respuesta definitiva."
+  },
+  {
+    "id": "factura_contenido",
+    "category": "Facturación",
+    "question": "¿Qué debe incluir una factura completa?",
+    "answer": "Número y serie si procede, fecha de expedición, identificación completa del emisor y del destinatario, NIF del emisor y en determinados casos del destinatario, domicilio, descripción de las operaciones, base imponible, tipo de IVA, cuota repercutida y, cuando corresponda, fecha de la operación distinta a la expedición."
+  },
+  {
+    "id": "modelo_303",
+    "category": "IVA",
+    "question": "¿Cuándo se presenta el modelo 303 trimestral?",
+    "answer": "Como regla general, la presentación trimestral del modelo 303 se realiza del 1 al 20 de abril, julio y octubre, y del 1 al 30 de enero para el cuarto trimestre. La domiciliación bancaria suele cerrarse antes."
+  },
+  {
+    "id": "modelo_130",
+    "category": "IRPF",
+    "question": "¿Cuándo se presenta el modelo 130?",
+    "answer": "Habitualmente se presenta por trimestres: del 1 al 20 de abril, julio y octubre, y del 1 al 30 de enero para el cuarto trimestre, salvo supuestos especiales o cambios normativos."
+  },
+  {
+    "id": "autonomo_libros",
+    "category": "Autónomos",
+    "question": "¿Qué libros debe llevar un autónomo en estimación directa?",
+    "answer": "Depende de si la actividad es empresarial o profesional. En actividades profesionales en estimación directa suelen exigirse libros registro de ingresos, gastos, bienes de inversión y provisiones de fondos/suplidos."
+  },
+  {
+    "id": "retenciones_alquiler",
+    "category": "Retenciones",
+    "question": "¿Cuándo se presenta el modelo 115?",
+    "answer": "El modelo 115 de retenciones por alquileres urbanos se presenta normalmente por trimestres en abril, julio, octubre y enero, dentro de los plazos generales trimestrales."
+  },
+  {
+    "id": "retenciones_trabajo",
+    "category": "Retenciones",
+    "question": "¿Cuándo se presenta el modelo 111?",
+    "answer": "El modelo 111 se presenta normalmente por trimestres en abril, julio, octubre y enero dentro de los plazos generales trimestrales, o mensualmente para determinados obligados."
+  },
+  {
+    "id": "impuesto_sociedades",
+    "category": "Sociedades",
+    "question": "¿Qué es el impuesto sobre sociedades?",
+    "answer": "Es el tributo que grava la renta de las personas jurídicas. El chatbot debe evitar dar por hecho el tipo aplicable sin revisar el caso, porque puede variar según entidad, dimensión y régimen."
+  },
+  {
+    "id": "alta_autonomo",
+    "category": "Autónomos",
+    "question": "¿Qué pasos básicos hay para darse de alta como autónomo?",
+    "answer": "Suele implicar alta censal ante Hacienda mediante modelo 036 o 037 cuando proceda, elección de epígrafe y régimen fiscal, y alta en Seguridad Social dentro de plazo."
+  },
+  {
+    "id": "disclaimer",
+    "category": "Legal",
+    "question": "¿Qué advertencia debe incluir el chatbot?",
+    "answer": "Debe indicar que ofrece información general fiscal y contable, que no sustituye asesoramiento profesional personalizado y que, ante decisiones con impacto económico o sancionador, conviene revisión por un asesor."
+  }
+]

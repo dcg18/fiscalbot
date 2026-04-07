@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Asistente fiscal y contable</title>
+    <style>
+      :root {
+        --bg: #0b1020;
+        --panel: #121933;
+        --panel-2: #1a2344;
+        --text: #edf2ff;
+        --muted: #b8c1e0;
+        --accent: #7aa2ff;
+        --accent-2: #5ae0c3;
+        --danger: #ff8a8a;
+        --border: rgba(255,255,255,.08);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: linear-gradient(180deg, #0b1020 0%, #0d1430 100%);
+        color: var(--text);
+      }
+      .layout {
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: 320px 1fr;
+      }
+      .sidebar {
+        border-right: 1px solid var(--border);
+        background: rgba(10, 15, 30, .6);
+        padding: 24px;
+      }
+      .main {
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        min-height: 100vh;
+      }
+      .brand {
+        font-size: 24px;
+        margin: 0 0 8px;
+      }
+      .subtitle {
+        color: var(--muted);
+        line-height: 1.5;
+        font-size: 14px;
+      }
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 16px;
+        margin-top: 18px;
+      }
+      .chip-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 12px;
+      }
+      .chip {
+        cursor: pointer;
+        border: 1px solid var(--border);
+        color: var(--text);
+        background: var(--panel-2);
+        border-radius: 999px;
+        padding: 10px 12px;
+        font-size: 13px;
+      }
+      .header {
+        padding: 18px 24px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        backdrop-filter: blur(6px);
+      }
+      .header strong { font-size: 18px; }
+      .booking {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--accent);
+        color: #081124;
+        text-decoration: none;
+        font-weight: 700;
+        padding: 10px 14px;
+        border-radius: 999px;
+      }
+      .chat {
+        padding: 24px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+      .msg {
+        max-width: 840px;
+        padding: 14px 16px;
+        border-radius: 16px;
+        white-space: pre-wrap;
+        line-height: 1.6;
+        border: 1px solid var(--border);
+      }
+      .assistant { background: var(--panel); align-self: flex-start; }
+      .user { background: #192347; align-self: flex-end; }
+      .composer {
+        padding: 18px 24px 26px;
+        border-top: 1px solid var(--border);
+      }
+      .composer-box {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 12px;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 12px;
+      }
+      textarea {
+        resize: none;
+        min-height: 70px;
+        border: 0;
+        outline: 0;
+        background: transparent;
+        color: var(--text);
+        font: inherit;
+      }
+      button {
+        border: 0;
+        border-radius: 14px;
+        padding: 12px 16px;
+        font-weight: 700;
+        cursor: pointer;
+        background: var(--accent-2);
+        color: #041813;
+      }
+      .muted { color: var(--muted); font-size: 13px; }
+      .error { color: var(--danger); }
+      @media (max-width: 900px) {
+        .layout { grid-template-columns: 1fr; }
+        .sidebar { display: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="sidebar">
+        <h1 class="brand">FiscalBot</h1>
+        <p class="subtitle">
+          Asistente fiscal y contable para España. Responde dudas frecuentes y deriva a cita cuando la consulta requiere revisión profesional.
+        </p>
+
+        <div class="card">
+          <strong>Consultas frecuentes</strong>
+          <div id="chips" class="chip-list"></div>
+        </div>
+
+        <div class="card">
+          <strong>Aviso</strong>
+          <p class="subtitle">
+            La información es general y no sustituye asesoramiento profesional personalizado.
+          </p>
+        </div>
+      </aside>
+
+      <main class="main">
+        <div class="header">
+          <div>
+            <strong id="businessName">Asistente fiscal</strong>
+            <div class="muted" id="businessMeta"></div>
+          </div>
+          <a id="bookingLink" class="booking" href="#" target="_blank" rel="noreferrer">Pedir cita</a>
+        </div>
+
+        <section id="chat" class="chat"></section>
+
+        <div class="composer">
+          <div class="composer-box">
+            <textarea id="input" placeholder="Escribe tu consulta: IVA, IRPF, autónomos, facturas, modelos, cierres, sociedades..."></textarea>
+            <button id="sendBtn">Enviar</button>
+          </div>
+          <div class="muted" style="margin-top:10px;">
+            Ejemplo: “Soy autónomo y quiero saber cuándo presento el modelo 303”.
+          </div>
+          <div id="status" class="muted" style="margin-top:8px;"></div>
+        </div>
+      </main>
+    </div>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
